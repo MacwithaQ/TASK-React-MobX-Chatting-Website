@@ -1,52 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import ChatRoom from "./components/ChatRoom";
 import ChatRoomsList from "./components/ChatRoomsList";
 import { Route, Routes } from "react-router-dom";
+import roomsStore from "./roomStore";
 import axios from "axios";
+import { observer } from "mobx-react";
 
 const App = () => {
-  const [rooms, setRooms] = useState([]);
-
   useEffect(() => {
-    fetchRooms();
+    roomsStore.fetchRooms();
   }, []);
 
-  const fetchRooms = async () => {
-    try {
-      const response = await axios.get(
-        "https://coded-task-axios-be.herokuapp.com/rooms"
-      );
-      setRooms(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const createRoom = async (newRoom) => {
-    try {
-      const response = await axios.post(
-        "https://coded-task-axios-be.herokuapp.com/rooms",
-        newRoom
-      );
-      setRooms([...rooms, response.data]);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const deleteRoom = async (id) => {
-    try {
-      const response = await axios.delete(
-        `https://coded-task-axios-be.herokuapp.com/rooms/${id}`
-      );
-      let tempRooms = rooms.filter((room) => room.id !== id);
-      setRooms(tempRooms);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const rooms = roomsStore.rooms;
 
   const updateRoom = async (updatedRoom) => {
     try {
@@ -57,7 +24,7 @@ const App = () => {
       let tempRooms = rooms.map((room) =>
         room.id === updatedRoom.id ? response.data : room
       );
-      setRooms(tempRooms);
+      // setRooms(tempRooms);
     } catch (error) {
       console.log(error);
     }
@@ -75,7 +42,7 @@ const App = () => {
           : room
       );
       console.log(tempRooms);
-      setRooms(tempRooms);
+      // setRooms(tempRooms);
     } catch (error) {
       console.log(error);
     }
@@ -91,14 +58,7 @@ const App = () => {
             />
             <Route
               path="/"
-              element={
-                <ChatRoomsList
-                  rooms={rooms}
-                  createRoom={createRoom}
-                  deleteRoom={deleteRoom}
-                  updateRoom={updateRoom}
-                />
-              }
+              element={<ChatRoomsList rooms={rooms} updateRoom={updateRoom} />}
             />
           </Routes>
         </center>
@@ -107,4 +67,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default observer(App);
